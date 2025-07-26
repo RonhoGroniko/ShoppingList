@@ -1,57 +1,81 @@
 package com.example.shoppinglist.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
-import com.example.shoppinglist.domain.ShopItem
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var linearLayoutShopList: LinearLayout
+    private lateinit var shopListAdapter: ShopListAdapter
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        linearLayoutShopList = findViewById(R.id.linearLayoutItems)
+        setupRecyclerView()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
-            showList(it)
+            shopListAdapter.shopList = it
         }
     }
 
-    private fun showList(list: List<ShopItem>) {
-        linearLayoutShopList.removeAllViews()
-        for (item in list) {
-            val layoutId = when {
-                item.enabled -> {
-                    R.layout.item_shop_enabled
-                }
-                else -> {
-                    R.layout.item_shop_disabled
-                }
-            }
-            val view = LayoutInflater.from(this).inflate(
-                layoutId,
-                linearLayoutShopList,
-                false
+    private fun setupRecyclerView() {
+        val recyclerViewItems = findViewById<RecyclerView>(R.id.recyclerViewItems)
+        with(recyclerViewItems) {
+            shopListAdapter = ShopListAdapter()
+            adapter = shopListAdapter
+            recycledViewPool.setMaxRecycledViews(
+                ShopListAdapter.VIEW_TYPE_ENABLED,
+                ShopListAdapter.MAX_POOL_SIZE
             )
-            val textViewName = view.findViewById<TextView>(R.id.textViewItemName)
-            val textViewCount = view.findViewById<TextView>(R.id.textViewItemCount)
-            textViewName.text = item.name
-            textViewCount.text = item.count.toString()
-            view.setOnLongClickListener {
-                viewModel.changeEnabledState(item)
-                true
-            }
-            linearLayoutShopList.addView(view)
+            recycledViewPool.setMaxRecycledViews(
+                ShopListAdapter.VIEW_TYPE_DISABLED,
+                ShopListAdapter.MAX_POOL_SIZE
+            )
+            setupOnLongClickListener()
+            setupOnClickListener()
+            setupOnSwipeListener(recyclerViewItems)
         }
+    }
+
+    private fun setupOnLongClickListener() {
+        shopListAdapter.onShopItemLongClickListener = {
+            viewModel.changeEnabledState(it)
+        }
+    }
+    private fun setupOnClickListener() {
+        shopListAdapter.onShopItemClickListener = {
+            Log.d("MainActivity", "clicked")
+        }
+    }
+    private fun setupOnSwipeListener(recyclerViewItems: RecyclerView) {
+        val callback = object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(
+                viewHolder: RecyclerView.ViewHolder,
+                direction: Int
+            ) {
+                val item = shopListAdapter.shopList[viewHolder.adapterPosition]
+                viewModel.deleteShopItem(item)
+            }
+        }
+        ItemTouchHelper(callback).attachToRecyclerView(recyclerViewItems)
     }
 }
 
