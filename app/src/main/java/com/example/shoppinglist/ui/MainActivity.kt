@@ -1,13 +1,13 @@
 package com.example.shoppinglist.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +22,11 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this) {
             shopListAdapter.submitList(it)
+        }
+        val buttonAddShopItem = findViewById<FloatingActionButton>(R.id.buttonAddItem)
+        buttonAddShopItem.setOnClickListener {
+            val intent = ShopItemActivity.newIntentAddItem(this)
+            startActivity(intent)
         }
     }
 
@@ -49,11 +54,14 @@ class MainActivity : AppCompatActivity() {
             viewModel.changeEnabledState(it)
         }
     }
+
     private fun setupOnClickListener() {
-        shopListAdapter.onShopItemClickListener = {
-            Log.d("MainActivity", "clicked")
+        shopListAdapter.onShopItemClickListener = { shopItem ->
+            val intent = ShopItemActivity.newIntentEditItem(this, shopItem.id)
+            startActivity(intent)
         }
     }
+
     private fun setupOnSwipeListener(recyclerViewItems: RecyclerView) {
         val callback = object : ItemTouchHelper.SimpleCallback(
             0,
