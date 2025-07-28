@@ -14,13 +14,13 @@ import com.google.android.material.textfield.TextInputLayout
 
 class ShopItemActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: ShopItemViewModel
-
-    private lateinit var textInputLayoutName: TextInputLayout
-    private lateinit var textInputLayoutCount: TextInputLayout
-    private lateinit var editTextName: TextInputEditText
-    private lateinit var editTextCount: TextInputEditText
-    private lateinit var buttonSave: Button
+//    private lateinit var viewModel: ShopItemViewModel
+//
+//    private lateinit var textInputLayoutName: TextInputLayout
+//    private lateinit var textInputLayoutCount: TextInputLayout
+//    private lateinit var editTextName: TextInputEditText
+//    private lateinit var editTextCount: TextInputEditText
+//    private lateinit var buttonSave: Button
 
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -29,75 +29,83 @@ class ShopItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shop_item)
         parseIntent()
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
-        initViews()
-        when (screenMode) {
-            MODE_ADD -> launchAddMode()
-            MODE_EDIT -> launchEditMode()
-        }
-        observeViewModel()
-        setupTextChangeListeners()
+//        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+//        initViews()
+        launchRightMode()
+//        observeViewModel()
+//        setupTextChangeListeners()
     }
 
-    private fun setupTextChangeListeners() {
-        editTextName.doOnTextChanged { _, _, _, _ ->
-            viewModel.resetInputNameError()
+    private fun launchRightMode() {
+        val fragment = when (screenMode) {
+            MODE_ADD -> ShopItemFragment.newInstanceAddItem()
+            MODE_EDIT -> ShopItemFragment.newInstanceEditItem(shopItemId)
+            else -> throw RuntimeException("Param screen mode is unknown: $screenMode")
         }
-        editTextCount.doOnTextChanged { _, _, _, _ ->
-            viewModel.resetInputCountError()
-        }
+        supportFragmentManager.beginTransaction()
+            .add(R.id.shopItemContainer, fragment)
+            .commit()
     }
 
-    private fun observeViewModel() {
-        viewModel.errorInputNameLD.observe(this) { isError ->
-            val message = if (isError) {
-                getString(R.string.error_input_name)
-            } else {
-                null
-            }
-            textInputLayoutName.error = message
-        }
-        viewModel.errorInputCountLD.observe(this) { isError ->
-            val message = if (isError) {
-                getString(R.string.error_input_count)
-            } else {
-                null
-            }
-            textInputLayoutCount.error = message
-        }
-        viewModel.shouldCloseScreenLD.observe(this) {
-            finish()
-        }
-    }
+//    private fun setupTextChangeListeners() {
+//        editTextName.doOnTextChanged { _, _, _, _ ->
+//            viewModel.resetInputNameError()
+//        }
+//        editTextCount.doOnTextChanged { _, _, _, _ ->
+//            viewModel.resetInputCountError()
+//        }
+//    }
 
-    private fun launchAddMode() {
-        buttonSave.setOnClickListener {
-            val name = editTextName.text?.toString()
-            val count = editTextCount.text?.toString()
-            viewModel.addShopItem(name, count)
-        }
-    }
+//    private fun observeViewModel() {
+//        viewModel.errorInputNameLD.observe(this) { isError ->
+//            val message = if (isError) {
+//                getString(R.string.error_input_name)
+//            } else {
+//                null
+//            }
+//            textInputLayoutName.error = message
+//        }
+//        viewModel.errorInputCountLD.observe(this) { isError ->
+//            val message = if (isError) {
+//                getString(R.string.error_input_count)
+//            } else {
+//                null
+//            }
+//            textInputLayoutCount.error = message
+//        }
+//        viewModel.shouldCloseScreenLD.observe(this) {
+//            finish()
+//        }
+//    }
+//
+//    private fun launchAddMode() {
+//        buttonSave.setOnClickListener {
+//            val name = editTextName.text?.toString()
+//            val count = editTextCount.text?.toString()
+//            viewModel.addShopItem(name, count)
+//        }
+//    }
+//
+//    private fun launchEditMode() {
+//        viewModel.getShopItem(shopItemId)
+//        viewModel.shopItemLD.observe(this) {
+//            editTextName.setText(it.name)
+//            editTextCount.setText(it.count.toString())
+//        }
+//        buttonSave.setOnClickListener {
+//            val name = editTextName.text?.toString()
+//            val count = editTextCount.text?.toString()
+//            viewModel.editShopItem(name, count)
+//        }
+//    }
 
-    private fun launchEditMode() {
-        viewModel.getShopItem(shopItemId)
-        viewModel.shopItemLD.observe(this) {
-            editTextName.setText(it.name)
-            editTextCount.setText(it.count.toString())
-        }
-        buttonSave.setOnClickListener {
-            val name = editTextName.text?.toString()
-            val count = editTextCount.text?.toString()
-            viewModel.editShopItem(name, count)
-        }
-    }
-
-    private fun initViews() {
-        textInputLayoutName = findViewById(R.id.textInputLayoutName)
-        textInputLayoutCount = findViewById(R.id.textInputLayoutCount)
-        editTextName = findViewById(R.id.editTextName)
-        editTextCount = findViewById(R.id.editTextCount)
-        buttonSave = findViewById(R.id.buttonSave)
-    }
+//    private fun initViews() {
+//        textInputLayoutName = findViewById(R.id.textInputLayoutName)
+//        textInputLayoutCount = findViewById(R.id.textInputLayoutCount)
+//        editTextName = findViewById(R.id.editTextName)
+//        editTextCount = findViewById(R.id.editTextCount)
+//        buttonSave = findViewById(R.id.buttonSave)
+//    }
 
     private fun parseIntent() {
         if (!intent.hasExtra(EXTRA_SCREEN_MODE)) {
