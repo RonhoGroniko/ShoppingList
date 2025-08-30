@@ -1,6 +1,7 @@
 package com.example.shoppinglist.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +12,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppinglist.R
 import com.example.shoppinglist.databinding.ActivityMainBinding
+import com.example.shoppinglist.domain.ShopItem
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditSuccessListener {
 
@@ -47,14 +50,30 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditSuccessListener
                 launchFragment(ShopItemFragment.newInstanceAddItem())
             }
         }
-        contentResolver.query(
-            "content://com.example.shoppinglist/shop_items/3".toUri(),
-            null,
-            null,
-            null,
-            null,
-            null,
-        )
+        thread {
+            val cursor = contentResolver.query(
+                "content://com.example.shoppinglist/shop_items".toUri(),
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
+            while (cursor?.moveToNext() == true) {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
+                val enabled = cursor.getInt(cursor.getColumnIndexOrThrow("enabled")) > 0
+                val shopItem = ShopItem(
+                    name = name,
+                    count = count,
+                    enabled = enabled,
+                    id = id
+                )
+                Log.d("MainActivity", shopItem.toString())
+            }
+            cursor?.close()
+        }
     }
 
     private fun isOnePaneMode(): Boolean {
