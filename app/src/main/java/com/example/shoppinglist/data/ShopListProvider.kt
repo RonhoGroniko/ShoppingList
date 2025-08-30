@@ -27,7 +27,13 @@ class ShopListProvider: ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String?>?
     ): Int {
-        TODO("Not yet implemented")
+        when (uriMatcher.match(uri)) {
+            GET_SHOP_ITEMS_QUERY -> {
+                val id = selectionArgs?.get(0)?.toInt() ?: -1
+                return shopListDao.deleteShopItemSync(id)
+            }
+        }
+        return 0
     }
 
     override fun getType(uri: Uri): String? {

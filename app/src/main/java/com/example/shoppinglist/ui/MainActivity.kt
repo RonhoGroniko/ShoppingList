@@ -141,7 +141,14 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditSuccessListener
                 direction: Int
             ) {
                 val item = shopListAdapter.currentList[viewHolder.adapterPosition]
-                viewModel.deleteShopItem(item)
+//                viewModel.deleteShopItem(item)
+                thread {
+                    contentResolver.delete(
+                        "content://com.example.shoppinglist/shop_items".toUri(),
+                        null,
+                        arrayOf(item.id.toString())
+                    )
+                }
             }
         }
         ItemTouchHelper(callback).attachToRecyclerView(recyclerViewItems)
