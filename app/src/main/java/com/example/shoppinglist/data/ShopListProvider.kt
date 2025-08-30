@@ -86,7 +86,25 @@ class ShopListProvider: ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String?>?
     ): Int {
-        TODO("Not yet implemented")
+        when (uriMatcher.match(uri)) {
+            GET_SHOP_ITEMS_QUERY -> {
+                if (values == null) return 0
+                val id = selectionArgs?.get(0)?.toInt() ?: -1
+                shopListDao.deleteShopItemSync(id)
+                val name = values.getAsString("name")
+                val count = values.getAsInteger("count")
+                val enabled = values.getAsBoolean("enabled")
+                val shopItem = ShopItemDbModel(
+                    id = id,
+                    name = name,
+                    count = count,
+                    enabled = enabled
+                )
+                shopListDao.addShopItemSync(shopItem)
+                return 1
+            }
+        }
+        return 0
     }
 
     companion object {
