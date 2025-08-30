@@ -1,18 +1,21 @@
 package com.example.shoppinglist.ui
 
+import android.content.ContentValues
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.shoppinglist.databinding.FragmentShopItemBinding
 import com.example.shoppinglist.domain.ShopItem
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
-class ShopItemFragment(): Fragment() {
+class ShopItemFragment() : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -90,7 +93,17 @@ class ShopItemFragment(): Fragment() {
         binding.buttonSave.setOnClickListener {
             val name = binding.editTextName.text?.toString()
             val count = binding.editTextCount.text?.toString()
-            viewModel.addShopItem(name, count)
+//            viewModel.addShopItem(name, count)
+            thread {
+                context?.contentResolver?.insert(
+                    "content://com.example.shoppinglist/shop_items".toUri(),
+                    ContentValues().apply {
+                        put("id", 0)
+                        put("name", name)
+                        put("count", count)
+                        put("enabled", true)
+                    })
+            }
         }
     }
 
