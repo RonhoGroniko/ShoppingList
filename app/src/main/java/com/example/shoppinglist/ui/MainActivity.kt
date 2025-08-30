@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditSuccessListener
             }
         }
         contentResolver.query(
-            "content://com.example.shoppinglist/shop_items".toUri(),
+            "content://com.example.shoppinglist/shop_items/3".toUri(),
             null,
             null,
             null,
