@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -46,6 +47,14 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditSuccessListener
                 launchFragment(ShopItemFragment.newInstanceAddItem())
             }
         }
+        contentResolver.query(
+            "content://com.example.shoppinglist/shop_items".toUri(),
+            null,
+            null,
+            null,
+            null,
+            null,
+        )
     }
 
     private fun isOnePaneMode(): Boolean {
